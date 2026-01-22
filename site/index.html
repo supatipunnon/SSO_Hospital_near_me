@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ค้นหาโรงพยาบาล | Hospital Finder</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            gap: 0;
+        }
+
+        .sidebar {
+            width: 400px;
+            background: white;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        .map-container {
+            flex: 1;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .header {
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e74c3c;
+            padding-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #e74c3c;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .location-btn {
+            width: 100%;
+            padding: 12px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 15px;
+            transition: background 0.3s;
+        }
+
+        .location-btn:hover {
+            background: #2980b9;
+        }
+
+        .location-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .filters {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .filter-group {
+            margin-bottom: 10px;
+        }
+
+        .filter-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .status {
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .status.loading {
+            background: #e8f4f8;
+            color: #3498db;
+        }
+
+        .status.error {
+            background: #fee;
+            color: #e74c3c;
+        }
+
+        .hospital-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .hospital-card {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 4px solid #3498db;
+        }
+
+        .hospital-card:hover {
+            background: #f0f0f0;
+            border-left-color: #e74c3c;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .hospital-card.active {
+            background: #e8f4f8;
+            border-left-color: #e74c3c;
+        }
+
+        .hospital-name {
+            font-weight: bold;
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 4px;
+            word-wrap: break-word;
+        }
+
+        .hospital-info {
+            font-size: 12px;
+            color: #666;
+            margin: 3px 0;
+        }
+
+        .hospital-distance {
+            font-weight: bold;
+            font-size: 14px;
+            color: #e74c3c;
+        }
+
+        .hospital-type {
+            display: inline-block;
+            font-size: 10px;
+            padding: 2px 6px;
+            background: #ecf0f1;
+            border-radius: 3px;
+            margin-top: 4px;
+        }
+
+        .hospital-type.public {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .hospital-type.private {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: 40%;
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+                max-height: 50%;
+                order: 2;
+            }
+
+            .map-container {
+                height: 60%;
+                order: 1;
+            }
+
+            .header h1 {
+                font-size: 18px;
+            }
+
+            .sidebar {
+                height: auto;
+                max-height: 50vh;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                padding: 12px;
+            }
+
+            .header h1 {
+                font-size: 16px;
+            }
+
+            .hospital-name {
+                font-size: 12px;
+            }
+
+            .location-btn {
+                padding: 10px;
+                font-size: 13px;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .search-box button {
+            padding: 10px 15px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.3s;
+        }
+
+        .search-box button:hover {
+            background: #229954;
+        }
+
+        .search-box button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .search-results {
+            display: none;
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .search-results.show {
+            display: block;
+        }
+
+        .search-result-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-result-item:hover {
+            background: #f0f0f0;
+        }
+
+        .search-result-item strong {
+            display: block;
+            color: #333;
+        }
+
+        .search-result-item small {
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="header">
+                <h1>🏥 ค้นหาสถานพยาบาลประกันสังคม</h1>
+                <p>ข้อมูลจาก: <a href="https://www.sso.go.th/wpr/assets/upload/files_storage/sso_th/b951cd564ed045490bd54c51be999131.pdf" target="_blank">รายชื่อสถานพยาบาลประกันสังคม ปี 2569 แยกตามจังหวัด</a></p>
+                <p>แก้ไขล่าสุด: <span id="dataLastUpdated"></span></p>
+                <br>
+                <p><u>หมายเหตุ:</u> ข้อมูลที่แสดงยังไม่รวมถึง <strong>สถานพยาบาลเครือข่าย</strong> ซึ่งสามารถดูได้จากแหล่งข้อมูลข้างต้น</p>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <button class="location-btn" id="locationBtn" style="flex: 1;">📍 ตำแหน่งของฉัน</button>
+                <button class="location-btn" id="pinBtn" style="flex: 1; background: #f39c12;" title="Click map to pin location">📌 ปักหมุด</button>
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 ค้นหาตำแหน่ง (เช่น สถานีอนุสาวรีย์)">
+                <button id="searchBtn">ค้นหา</button>
+            </div>
+
+            <div class="search-results" id="searchResults"></div>
+
+            <div class="pin-status" id="pinStatus" style="display: none; padding: 10px; background: #fff3cd; border-radius: 4px; margin-bottom: 15px; font-size: 12px;">
+                📌 ปักหมุดที่: <span id="pinCoords"></span>
+                <button id="clearPinBtn" style="float: right; background: none; border: none; color: #f39c12; cursor: pointer; font-weight: bold;">✕</button>
+            </div>
+
+            <div class="status" id="status"></div>
+
+            <div class="hospital-list" id="hospitalList"></div>
+        </div>
+
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="hospitals.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
