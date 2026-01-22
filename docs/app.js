@@ -349,7 +349,7 @@ window.addEventListener('load', () => {
 window.addEventListener('load', () => {
     const lastEditedSpan = document.getElementById('dataLastUpdated');
     if (typeof dataLastUpdated !== 'undefined') {
-        const date = new Date(dataLastUpdated);
+        const date = dataLastUpdated;
         const thaiMonths = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 
                            'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
         const day = date.getDate();
