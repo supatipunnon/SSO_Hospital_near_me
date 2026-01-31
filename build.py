@@ -33,7 +33,8 @@ def build_hospitals_js():
                     "type": row.get("รัฐ/เอกชน", "").strip(),
                     "name": row.get("โรงพยาบาล", "").strip(),
                     "latitude": float(row.get("latitude", 0)),
-                    "longitude": float(row.get("longitude", 0))
+                    "longitude": float(row.get("longitude", 0)),
+                    "google_maps_url": row.get("google_maps_url", "").strip()
                 }
                 # Only add if name is not empty
                 if hospital["name"]:

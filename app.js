@@ -271,7 +271,10 @@ function displayHospitals() {
             fillOpacity: 0.8
         }).addTo(hospitalLayer);
 
-        marker.bindPopup(`<strong>${hospital.name}</strong><br>${hospital.type}`);
+        let popupContent = `<strong>${hospital.name}</strong>`;
+        if (hospital.type) popupContent += `<br>${hospital.type}`;
+        if (hospital.google_maps_url) popupContent += `<br><a href="${hospital.google_maps_url}" target="_blank" rel="noopener noreferrer">open in google map</a>`;
+        marker.bindPopup(popupContent);
         
         hospitalMarkers.push({ marker, hospital, index });
 
