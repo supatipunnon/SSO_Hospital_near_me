@@ -47,7 +47,7 @@ def build_hospitals_js():
 
             # update edit date
             now = datetime.now()
-            f.write(f"const dataLastUpdated = Date('{now.strftime('%Y-%m-%d')}');\n")
+            f.write(f"const dataLastUpdated = new Date('{now.strftime('%Y-%m-%d')}');\n")
         
         print(f"✅ Success! Generated {len(hospitals)} hospitals")
         print(f"📁 Output: {output_file}")

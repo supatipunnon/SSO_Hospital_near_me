@@ -1911,4 +1911,4 @@ const hospitals = [
         "longitude": 104.8654529
     }
 ];
-const dataLastUpdated = Date('2026-01-22');
+const dataLastUpdated = new Date('2026-01-31');
