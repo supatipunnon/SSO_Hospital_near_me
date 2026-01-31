@@ -15,8 +15,8 @@ def build_hospitals_js():
     
     # Get the directory of this script
     script_dir = Path(__file__).parent
-    csv_file = script_dir / "sso 2026.csv"
-    output_file = script_dir / "hospital-finder" / "hospitals.js"
+    csv_file = script_dir / "data" / "sso 2026.csv"
+    output_file = script_dir / "hospitals.js"
     
     if not csv_file.exists():
         print(f"❌ Error: {csv_file} not found!")
